@@ -1,0 +1,17 @@
+**/__pycache__/
+test_imgs/
+GEI/GEI_data
+GEI/models/
+GEI/runs/
+single_frame/single_frame_data
+single_frame/models/
+single_frame/runs/
+key_frames/key_frame_data
+key_frames/models/
+key_frames/runs/
+*.o
+*.so
+*.so.*
+utils/build/
+*.ods
+*.pth
