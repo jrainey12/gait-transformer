@@ -368,9 +368,9 @@ def load_data(data_dir, batch_size, train):#, mean, std):
     RandRot = transforms.RandomRotation(10)
     RandHFlip = transforms.RandomHorizontalFlip()
     RandBlur = transforms.RandomApply([transforms.GaussianBlur(kernel_size=(3, 9), sigma=(0.1, 5))],p=0.25)
-    
+    RandCrop = transforms.RandomCrop((224,224)) 
     if train:
-        Augs = [RandRot, RandHFlip, RandBlur]
+        Augs = [RandRot, RandHFlip, RandBlur, RandCrop]
     else:
         Augs = []
     

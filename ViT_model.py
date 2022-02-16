@@ -1,7 +1,6 @@
 import torch 
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-
 from torch import nn
 from torch import Tensor
 from PIL import Image
@@ -9,8 +8,8 @@ from torchvision.transforms import Compose, Resize, ToTensor
 from einops import rearrange, reduce, repeat
 from einops.layers.torch import Rearrange, Reduce
 from torchsummary import summary
-
 import numpy as np
+
 
 class PatchEmbedding(nn.Module):
     """
@@ -21,7 +20,7 @@ class PatchEmbedding(nn.Module):
         super().__init__()
         self.proj = nn.Sequential(
             # break down images into patches(s1xs2) and flatten them.
-            # Use conv layer for best performancei
+            # Use conv layer for best performance
             nn.Conv2d(in_channels, emb_size, kernel_size=patch_size, stride=patch_size),
             Rearrange('b e (h) (w) -> b (h w) e'),
         )
@@ -34,10 +33,10 @@ class PatchEmbedding(nn.Module):
     
     def forward(self, x: Tensor) -> Tensor:
         b, _, _, _ = x.shape
-        #Detach to give fixed random patch projection to reduce instability
-        x = self.proj(x)#.detach()
+        x = self.proj(x)
         cls_tokens = repeat(self.cls_token, '() n e -> b n e', b=b)
         #Prepend CLS token to the input
+        #x is detached to give fixed random patch projection which reduces training instability
         x = torch.cat([cls_tokens, x.detach()], dim=1)
         # add position embedding
         x += self.positions
@@ -130,13 +129,17 @@ class TransformerEncoderBlock(nn.Sequential):
 
 class TransformerEncoder(nn.Sequential):
     """
-    Full Transformer Encoder.
+    Full Transformer Encoder consisting of 'depth' encoder blocks.
     """
     def __init__(self, depth: int = 12, **kwargs):
         super().__init__(*[TransformerEncoderBlock(**kwargs) for _ in range(depth)])
 
 
 class ClassificationHead(nn.Sequential):
+    """
+    MLP head for classification.
+    Two classes for binary problem.
+    """
     def __init__(self, emb_size: int, n_classes: int = 2):
         super().__init__(
                 Reduce('b n e -> b e', reduction='mean'),
@@ -156,8 +159,8 @@ class ViT(nn.Sequential):
                  depth: int = 12,
                  n_classes: int = 2,
                  **kwargs):
-        super().__init__(
-                PatchEmbedding(in_channels, patch_size, emb_size, img_size),#.detach(),
+        super().__init__( 
+                PatchEmbedding(in_channels, patch_size, emb_size, img_size),
                 TransformerEncoder(depth, emb_size=emb_size, **kwargs),
                 ClassificationHead(emb_size, n_classes)
                 )

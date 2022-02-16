@@ -41,6 +41,7 @@ if __name__=='__main__':
     parser.add_argument(
         'input_dir',
         help="Directory of the data.")
+    
     parser.add_argument(
         'input_type',
         choices=['GEI','keyframe','single'],
